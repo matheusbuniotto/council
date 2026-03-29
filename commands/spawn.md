@@ -1,5 +1,5 @@
 ---
-description: Spawn a single expert agent from your knowledge base. Usage — /council:spawn <slug> [--ephemeral|--persist]. Ephemeral agents are removed after the session; persistent agents stay in .claude/agents/.
+description: Spawn a single expert agent from your knowledge base. Usage — /council:spawn <slug>. Prompts for ephemeral/persistent mode unless --ephemeral, --persist, or --user flag is given.
 allowed-tools: Bash, Read, Glob, Write
 ---
 
@@ -14,7 +14,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/config.yml`.
 
 ## Resolve the expert
 
-The user passes a slug (e.g. `chip-huyen`, `martin-fowler`). It may be passed as `$ARGUMENTS`.
+Parse `$ARGUMENTS` for the slug and any flag (`--ephemeral`, `--persist`, `--user`).
 
 If no slug given: ask "Which expert? (e.g. chip-huyen, martin-fowler)"
 
@@ -22,33 +22,24 @@ Search for `{experts_clones_path}/**/{slug}/brain.md` using Glob.
 
 - If not found: list available slugs by globbing `{experts_clones_path}/**/brain.md` and extracting parent directory names. Ask user to pick one.
 
-## Determine mode
+## Pick spawn mode
 
-Check `$ARGUMENTS` for flags:
-- `--ephemeral` → mode = ephemeral
-- `--persist` → mode = persistent
+If `agents_output_scope` is `project` and no flag given → mode = `project`, skip picker.
+If `agents_output_scope` is `user` and no flag given → mode = `user`, skip picker.
 
-If no flag: check `agents_output_scope` from config:
-- `project` or `user` → mode = persistent
-- `ask` → ask the user:
+Otherwise run the interactive picker:
 
+```bash
+MODE=$(bash "${CLAUDE_PLUGIN_ROOT}/scripts/pick-mode.sh" "spawn {slug}" "{flag}")
 ```
-Spawn mode:
-  1) ephemeral  — active this session only, removed after
-  2) persistent — saved to .claude/agents/, available across sessions
-```
+
+`MODE` will be one of: `ephemeral` | `project` | `user`.
 
 ## Determine output path
 
-**Ephemeral:**
-- Write to `{cwd}/.claude/agents/{slug}.md`
-- Register the file path in `~/.council-ephemeral-agents` (append one path per line)
-
-**Persistent (project):**
-- Write to `{cwd}/.claude/agents/{slug}.md`
-
-**Persistent (user):**
-- Write to `~/.claude/agents/{slug}.md`
+- `ephemeral` → `{cwd}/.claude/agents/{slug}.md`
+- `project`   → `{cwd}/.claude/agents/{slug}.md`
+- `user`      → `~/.claude/agents/{slug}.md`
 
 ## Read frontmatter
 
@@ -61,35 +52,29 @@ Check if `{experts_clones_path}/**/{slug}/soul.md` exists. If yes: read it.
 
 ## Generate agent file
 
-Read `${CLAUDE_PLUGIN_ROOT}/templates/agent-template.md`.
+Read `${CLAUDE_PLUGIN_ROOT}/templates/agent-template.md`. Fill and write to output path.
 
-Fill in the template with:
-- `name`: `{slug}`
-- `description`: the `use_when` field from frontmatter
-- `brain_path`: absolute path to `brain.md`
-- `topics`: from frontmatter
-- `key_concepts`: from frontmatter
+## Register ephemeral
 
-Write to the resolved output path.
+If `MODE` is `ephemeral`: append the output path to `~/.council-ephemeral-agents`.
 
 ## Report
 
 **Ephemeral:**
 ```
 ⟳ Spawned (ephemeral): @{slug}
-  Expert:    {name}
-  Use when:  {use_when}
-  File:      {output_path}
-  Lifetime:  this session only
+  Expert:   {name}
+  Use when: {use_when}
+  File:     {output_path}
 
-Run /council:dismiss to remove ephemeral agents when done.
+Run /council:dismiss to remove when done.
 ```
 
 **Persistent:**
 ```
 ⬡ Spawned (persistent): @{slug}
-  Expert:    {name}
-  Use when:  {use_when}
-  File:      {output_path}
-  Scope:     project | user
+  Expert:   {name}
+  Use when: {use_when}
+  Scope:    project | user
+  File:     {output_path}
 ```

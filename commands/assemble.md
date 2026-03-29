@@ -1,5 +1,5 @@
 ---
-description: Assemble a team of Claude agents from your expert-clones knowledge base. Usage — /council:assemble <topic|team.yml> [--ephemeral|--persist]. Examples — /council:assemble rag, /council:assemble evals --ephemeral
+description: Assemble a team of Claude agents from your knowledge base. Usage — /council:assemble <topic|team.yml>. Prompts for ephemeral/persistent mode unless --ephemeral, --persist, or --user flag is given.
 allowed-tools: Bash, Read, Glob, Write
 ---
 
@@ -12,40 +12,30 @@ Read `${CLAUDE_PLUGIN_ROOT}/config.yml`.
 - If missing: stop and say "Run `/council:setup` first to configure paths."
 - If present: extract `experts_clones_path`, `topics_index_path`, `agents_output_scope`.
 
-## Determine input mode
+## Determine input
 
-The user may pass:
-- A **topic string** (e.g. `rag`, `evals`, `python`) → route via topics-index
-- A **team.yml file path** → load team definition directly
-- Nothing → ask: "What topic or team file?"
+Parse `$ARGUMENTS` for the topic/file and any flag (`--ephemeral`, `--persist`, `--user`).
 
-## Determine spawn mode
+If no topic given: ask "What topic or team file?"
 
-Check `$ARGUMENTS` for flags:
-- `--ephemeral` → mode = ephemeral
-- `--persist` → mode = persistent
+## Pick spawn mode
 
-If no flag: check `agents_output_scope` from config:
-- `project` or `user` → mode = persistent
-- `ask` → ask the user:
+If `agents_output_scope` is `project` and no flag given → mode = `project`, skip picker.
+If `agents_output_scope` is `user` and no flag given → mode = `user`, skip picker.
 
+Otherwise run the interactive picker:
+
+```bash
+MODE=$(bash "${CLAUDE_PLUGIN_ROOT}/scripts/pick-mode.sh" "assemble {topic}" "{flag}")
 ```
-Spawn mode for this team:
-  1) ephemeral  — active this session only, removed after
-  2) persistent — saved to .claude/agents/, available across sessions
-```
+
+`MODE` will be one of: `ephemeral` | `project` | `user`.
 
 ## Determine output path
 
-**Ephemeral:**
-- Output path: `{cwd}/.claude/agents/`
-- After assembler writes the files, register each file path in `~/.council-ephemeral-agents` (append one path per line)
-
-**Persistent (project):**
-- Output path: `{cwd}/.claude/agents/`
-
-**Persistent (user):**
-- Output path: `~/.claude/agents/`
+- `ephemeral` → `{cwd}/.claude/agents/`
+- `project`   → `{cwd}/.claude/agents/`
+- `user`      → `~/.claude/agents/`
 
 ## Delegate to assembler agent
 
@@ -62,33 +52,33 @@ template_path: ${CLAUDE_PLUGIN_ROOT}/templates/agent-template.md
 
 Wait for the assembler to return the list of generated files.
 
-After assembler returns: if mode is ephemeral, register each output file in `~/.council-ephemeral-agents`.
+## Register ephemeral
+
+If `MODE` is `ephemeral`: append each output file path to `~/.council-ephemeral-agents`.
 
 ## Report
 
 **Ephemeral:**
 ```
-⟳ Council assembled (ephemeral) — topic: <topic>
-  Lifetime: this session only
+⟳ Council assembled (ephemeral) — {topic}
 
   Agent           | Expert           | File
   ----------------|------------------|-----------------------------
-  <slug>          | <name>           | <filename>.md
+  {slug}          | {name}           | {slug}.md
   ...
 
-Agents are active. Invoke with @<slug>.
-Run /council:dismiss to remove when done.
+Agents active this session. Run /council:dismiss to remove when done.
 ```
 
 **Persistent:**
 ```
-⬡ Council assembled (persistent) — topic: <topic>
+⬡ Council assembled (persistent) — {topic}
   Scope: project | user
 
   Agent           | Expert           | File
   ----------------|------------------|-----------------------------
-  <slug>          | <name>           | <filename>.md
+  {slug}          | {name}           | {slug}.md
   ...
 
-Agents are active. Invoke with @<slug>.
+Invoke with @{slug}.
 ```
