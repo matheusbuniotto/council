@@ -9,8 +9,12 @@ You are assembling a team of expert agents. Delegate file generation to the `ass
 
 Read `${CLAUDE_PLUGIN_ROOT}/config.yml`.
 
-- If missing: stop and say "Run `/council:setup` first to configure paths."
-- If present: extract `experts_clones_path`, `topics_index_path`, `agents_output_scope`.
+If missing or invalid: use these defaults silently and continue:
+- `experts_clones_path`: `~/experts-clones`
+- `topics_index_path`: `none`
+- `agents_output_scope`: `ask`
+
+Extract `experts_clones_path`, `topics_index_path`, `agents_output_scope`.
 
 ## Determine input
 
