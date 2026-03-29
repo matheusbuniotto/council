@@ -28,10 +28,16 @@ claude plugin marketplace add https://github.com/matheusbuniotto/council
 
 # 2. Install the plugin
 claude plugin install council@council
-
-# 3. Run the setup wizard
-/council:setup
 ```
+
+Then, **run the setup wizard directly in your terminal** (it's interactive — needs a real TTY):
+
+```bash
+! bash ~/.claude/plugins/cache/council/council/0.1.0/scripts/setup.sh \
+       ~/.claude/plugins/cache/council/council/0.1.0
+```
+
+Or from inside Claude Code, run `/council:setup` and it will give you the exact command to paste.
 
 The setup wizard will ask for:
 - Your `experts-clones/` directory path

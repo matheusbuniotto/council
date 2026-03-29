@@ -18,18 +18,23 @@ Parse `$ARGUMENTS` for the topic/file and any flag (`--ephemeral`, `--persist`, 
 
 If no topic given: ask "What topic or team file?"
 
-## Pick spawn mode
+## Determine mode
 
-If `agents_output_scope` is `project` and no flag given → mode = `project`, skip picker.
-If `agents_output_scope` is `user` and no flag given → mode = `user`, skip picker.
+If `--ephemeral` flag → mode = `ephemeral`
+If `--persist` flag  → mode = `project`
+If `--user` flag     → mode = `user`
 
-Otherwise run the interactive picker:
+If no flag and `agents_output_scope` is `project` → mode = `project`, skip prompt.
+If no flag and `agents_output_scope` is `user`    → mode = `user`, skip prompt.
 
-```bash
-MODE=$(bash "${CLAUDE_PLUGIN_ROOT}/scripts/pick-mode.sh" "assemble {topic}" "{flag}")
-```
-
-`MODE` will be one of: `ephemeral` | `project` | `user`.
+If no flag and `agents_output_scope` is `ask`: use AskUserQuestion:
+- header: "Team scope"
+- question: "How long should this team live?"
+- multiSelect: false
+- options:
+  - label: "Ephemeral" — description: "This session only. Removed when you run /council:dismiss."
+  - label: "Project"   — description: "Saved to .claude/agents/ in this project. Persists across sessions."
+  - label: "User"      — description: "Saved to ~/.claude/agents/. Available in all projects."
 
 ## Determine output path
 
@@ -54,7 +59,7 @@ Wait for the assembler to return the list of generated files.
 
 ## Register ephemeral
 
-If `MODE` is `ephemeral`: append each output file path to `~/.council-ephemeral-agents`.
+If mode is `ephemeral`: append each output file path as a new line to `~/.council-ephemeral-agents`.
 
 ## Report
 
@@ -67,7 +72,7 @@ If `MODE` is `ephemeral`: append each output file path to `~/.council-ephemeral-
   {slug}          | {name}           | {slug}.md
   ...
 
-Agents active this session. Run /council:dismiss to remove when done.
+Agents active this session. Type @ to invoke. Run /council:dismiss to remove when done.
 ```
 
 **Persistent:**
@@ -80,5 +85,5 @@ Agents active this session. Run /council:dismiss to remove when done.
   {slug}          | {name}           | {slug}.md
   ...
 
-Type @ and select {slug} from the agent picker.
+Type @ and select the agent from the picker.
 ```
