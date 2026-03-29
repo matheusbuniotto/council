@@ -80,5 +80,5 @@ Agents active this session. Run /council:dismiss to remove when done.
   {slug}          | {name}           | {slug}.md
   ...
 
-Invoke with @{slug}.
+Type @ and select {slug} from the agent picker.
 ```

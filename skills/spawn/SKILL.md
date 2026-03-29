@@ -60,4 +60,4 @@ Use when: {use_when}
 File: .claude/agents/{slug}.md
 ```
 
-"Invoke with `@{slug}` in this session."
+"Type @ and select {slug} from the agent picker in this session."

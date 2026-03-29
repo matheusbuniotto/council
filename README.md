@@ -5,8 +5,8 @@
 **Council** turns your curated notes on thinkers, authors, and practitioners into live Claude Code agents. Clone any expert's reasoning into an agent, then invoke them by name — solo or as a team assembled by topic.
 
 ```
-/council:spawn chip-huyen       → @chip-huyen is ready
-/council:assemble rag           → team assembled: @chip-huyen @eugene-yan
+/council:spawn chip-huyen       → agent ready, type @ to invoke
+/council:assemble rag           → team assembled, type @ to pick an expert
 /council:assemble team.yml      → custom team from a definition file
 ```
 
@@ -16,7 +16,7 @@
 
 You maintain a directory of `brain.md` files — distilled notes on experts you follow. Council reads those files and generates Claude Code agents on-the-fly, each inheriting the expert's frameworks, vocabulary, and consulting lens.
 
-The result: instead of asking Claude a generic question, you ask **@chip-huyen** about your RAG pipeline, or assemble the **rag team** to review your eval setup together.
+The result: instead of asking Claude a generic question, you invoke **chip-huyen** from the agent picker (`@`) to review your RAG pipeline, or assemble the **rag team** and pick who to ask.
 
 ---
 
@@ -45,9 +45,12 @@ The setup wizard will ask for:
 | Command | What it does |
 |---|---|
 | `/council:setup` | First-time wizard — configure paths and options |
-| `/council:spawn <slug>` | Spawn a single expert agent on-the-fly |
-| `/council:assemble <topic>` | Assemble a team of agents matching a topic |
+| `/council:spawn <slug>` | Spawn a single expert agent — prompts for ephemeral or persistent |
+| `/council:assemble <topic>` | Assemble a team by topic — prompts for ephemeral or persistent |
 | `/council:assemble <team.yml>` | Assemble from a named team definition file |
+| `/council:dismiss` | Remove all ephemeral agents from this session |
+
+Flags skip the mode prompt: `--ephemeral`, `--persist`, `--user`.
 
 ---
 
@@ -119,9 +122,11 @@ evals:
 
 Generates `.claude/agents/chip-huyen.md` and makes the agent available immediately.
 
+Invoke by typing `@` and selecting `chip-huyen` from the agent picker, or explicitly:
+
 ```
-@chip-huyen review this RAG pipeline
-@chip-huyen should I fine-tune or keep prompting?
+@agent-chip-huyen review this RAG pipeline
+@agent-chip-huyen should I fine-tune or keep prompting?
 ```
 
 ### Assemble a team by topic
@@ -141,7 +146,7 @@ Agent          | Expert        | File
 chip-huyen     | Chip Huyen    | chip-huyen.md
 eugene-yan     | Eugene Yan    | eugene-yan.md
 
-Agents are active. Invoke with @chip-huyen or @eugene-yan.
+Agents are active. Type @ and select chip-huyen or eugene-yan from the picker.
 ```
 
 ### Assemble from a team file
@@ -178,7 +183,7 @@ Generated agents are standard Claude Code agent files (`.claude/agents/*.md`). T
 
 - Load your `brain.md` on demand — only the relevant sections
 - Respond in the expert's voice, using their frameworks
-- Defer to other experts when appropriate (`"For evals, ask @shreya-shankar"`)
+- Defer to other experts when appropriate (`"For evals, invoke shreya-shankar"`)
 - Are scoped to the project (or user-wide, your choice)
 
 Council generates them; Claude Code runs them. No magic — just well-structured prompts from your own notes.

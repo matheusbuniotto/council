@@ -56,4 +56,4 @@ Agent             | Expert(s)          | File
 ...
 ```
 
-Then: "Agents are active for this session. Invoke with `@<agent-name>`."
+Then: "Agents are active for this session. Type @ and select the agent from the picker."
