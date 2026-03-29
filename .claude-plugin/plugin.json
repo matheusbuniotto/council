@@ -1,0 +1,13 @@
+{
+  "name": "council",
+  "description": "Summon a council of expert agents from your personal knowledge base. Clone any thinker into a Claude Code agent — spawn solo or assemble a team by topic.",
+  "version": "0.1.0",
+  "author": {
+    "name": "matheusbuniotto",
+    "url": "https://github.com/matheusbuniotto"
+  },
+  "homepage": "https://github.com/matheusbuniotto/council",
+  "repository": "https://github.com/matheusbuniotto/council",
+  "license": "MIT",
+  "keywords": ["agents", "knowledge", "expert", "brain", "second-brain", "clone", "council"]
+}

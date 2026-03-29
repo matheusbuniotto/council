@@ -1,0 +1,14 @@
+# team.yml — expert-agency team definition
+# Use with: /expert-agency:assemble path/to/team.yml
+#
+# Define a named team of experts to assemble as agents.
+# Each expert must have a brain.md at {experts_clones_path}/**/{slug}/brain.md
+
+name: rag-pipeline-team
+description: Team for reviewing RAG pipeline architecture and eval strategy
+
+experts:
+  - slug: chip-huyen
+  - slug: jason-liu
+  - slug: eugene-yan
+  - slug: shreya-shankar
