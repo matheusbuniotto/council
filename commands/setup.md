@@ -23,14 +23,14 @@ If "Update it" or config missing: proceed.
 
 Ask with AskUserQuestion:
 - header: "Clones path"
-- question: "Where is your experts-clones directory? Type the path below (e.g. ~/brain/knowledge/experts-clones). If you're not sure yet, choose 'Use default' to configure manually later."
+- question: "Where is your experts-clones directory? This is where you keep your brain.md files (e.g. ~/brain/knowledge/experts-clones)."
 - options:
   - label: "I'll type it" — description: "Ask me for the path."
-  - label: "Use default" — description: "Sets path to ${CLAUDE_PLUGIN_ROOT}/examples — you can edit config.yml later."
+  - label: "Not set up yet" — description: "Skip for now. You can re-run /council:setup later when your directory is ready."
 
-If "I'll type it": ask as a follow-up message "Path to experts-clones:". Expand `~` to full home path. Check if the directory exists with Glob. If not found, warn but continue.
+If "I'll type it": ask as a follow-up message "Path to experts-clones:". Expand `~` to full home path. Check if the directory exists with Glob. If not found, warn but continue — the user may create it later.
 
-If "Use default": use `${CLAUDE_PLUGIN_ROOT}/examples` expanded to full home path.
+If "Not set up yet": inform the user that `/council:spawn` and `/council:assemble` won't work until this is configured. Stop here — do not write a config.
 
 ## Step 3 — Topics index
 

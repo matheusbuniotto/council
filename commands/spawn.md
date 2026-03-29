@@ -9,9 +9,8 @@ You are spawning a single expert agent. Language: match the user's language.
 
 Read `${CLAUDE_PLUGIN_ROOT}/config.yml`.
 
-If missing or invalid: use these defaults silently and continue:
-- `experts_clones_path`: `${CLAUDE_PLUGIN_ROOT}/examples`
-- `agents_output_scope`: `ask`
+If missing or invalid: stop and say:
+> "Run `/council:setup` first to configure your experts-clones path."
 
 Extract `experts_clones_path`, `agents_output_scope`.
 
