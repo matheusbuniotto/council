@@ -32,7 +32,9 @@ template_path: <absolute path to agent-template.md>
    - Find the entry matching `input` (exact key match first, then substring).
    - Extract the list of `{slug, section, priority}` entries. Take all `priority: primary` slugs first, then `secondary` if team would have fewer than 2 experts.
    - If `agent` field exists in the topic entry, note it (used for agent naming).
-   - If topic not found in index: glob `{experts_clones_path}/**/brain.md`, read first 20 lines of each to check `topics` field in frontmatter. Match slugs where `input` appears in their `topics` list.
+   - If topic not found in index: **stop and return error** — `topic "{input}" not found in topics-index.yml. Add it to the index or use /council:spawn <slug> directly.` Do NOT glob brain.md files.
+
+If `topics_index_path` is `"none"`: **stop and return error** — `No topics-index.yml configured. Use /council:spawn <slug> to spawn experts directly, or run /council:setup to configure a topics index.`
 
 2. For each resolved slug: read only the **first 25 lines** of `{experts_clones_path}/**/{slug}/brain.md`.
    Extract from YAML frontmatter: `name`, `slug`, `area`, `use_when`, `topics`, `key_concepts`, `pairs_well_with`.
@@ -81,11 +83,9 @@ Read `agent-template.md`. Replace these placeholders:
 
 ### soul_content fallback (no soul.md)
 
-If no `soul.md` exists: read the full `brain.md` and extract the first section whose heading contains any of: `Would Advise`, `Consulting Mode`, `How to Apply`.
+If no `soul.md` exists: read only the **first 80 lines** of `brain.md` (the frontmatter and opening sections are always there). Extract the first section whose heading contains any of: `Would Advise`, `Consulting Mode`, `How to Apply`, `Identity`, `Worldview`.
 
-If none of those exist: extract `## Identity` + `## Worldview` + `## Key Principles` sections only.
-
-Use the extracted content as `{{soul_content}}`.
+Use whatever is found as `{{soul_content}}`. If nothing matches in the first 80 lines, use an empty string — do not read more of the file.
 
 ---
 
