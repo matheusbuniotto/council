@@ -1,122 +1,204 @@
-# expert-agency
+# council — Claude Code Plugin
 
-Claude Code plugin for assembling and spawning expert agents from a personal knowledge base of expert clones.
+> Summon a council of expert agents from your personal knowledge base.
+
+**Council** turns your curated notes on thinkers, authors, and practitioners into live Claude Code agents. Clone any expert's reasoning into an agent, then invoke them by name — solo or as a team assembled by topic.
+
+```
+/council:spawn chip-huyen       → @chip-huyen is ready
+/council:assemble rag           → team assembled: @chip-huyen @eugene-yan
+/council:assemble team.yml      → custom team from a definition file
+```
+
+---
 
 ## What it does
 
-- `/expert-agency:assemble <topic>` — finds experts that cover a topic, generates agent `.md` files, makes them available immediately
-- `/expert-agency:spawn <slug>` — generates a single expert agent on-the-fly
-- `/expert-agency:setup` — first-time wizard: configures paths, validates structure, offers an example clone
+You maintain a directory of `brain.md` files — distilled notes on experts you follow. Council reads those files and generates Claude Code agents on-the-fly, each inheriting the expert's frameworks, vocabulary, and consulting lens.
 
-## Requirements
+The result: instead of asking Claude a generic question, you ask **@chip-huyen** about your RAG pipeline, or assemble the **rag team** to review your eval setup together.
 
-- Claude Code with plugins enabled
-- A directory of `brain.md` files (your expert-clones knowledge base)
-- Optional but recommended: a `topics-index.yml` for topic-based routing
+---
 
 ## Install
 
 ```bash
-# Clone or copy this plugin to your user plugins directory
-cp -r expert-agency ~/.claude/plugins/
+# 1. Add the council marketplace
+claude plugin marketplace add https://github.com/matheusbuniotto/council
 
-# Run the setup wizard in Claude Code
-/expert-agency:setup
+# 2. Install the plugin
+claude plugin install council@council
+
+# 3. Run the setup wizard
+/council:setup
 ```
 
-## First-time setup
+The setup wizard will ask for:
+- Your `experts-clones/` directory path
+- Your `topics-index.yml` path (optional — enables `/council:assemble <topic>`)
+- Default agent output scope (project or user)
 
-Run `/expert-agency:setup`. The wizard will:
+---
 
-1. Ask where your `experts-clones` directory is
-2. Locate your `topics-index.yml`
-3. Offer to clone an example expert brain (deep or simple) so you have a reference
-4. Ask your default agent output scope (project or user)
-5. Write `~/.claude/plugins/expert-agency/config.yml`
+## Commands
 
-## Usage
+| Command | What it does |
+|---|---|
+| `/council:setup` | First-time wizard — configure paths and options |
+| `/council:spawn <slug>` | Spawn a single expert agent on-the-fly |
+| `/council:assemble <topic>` | Assemble a team of agents matching a topic |
+| `/council:assemble <team.yml>` | Assemble from a named team definition file |
 
-```bash
-# Assemble a team for a topic (uses topics-index.yml for routing)
-/expert-agency:assemble rag
-/expert-agency:assemble evals
-/expert-agency:assemble python
+---
 
-# Assemble from a team definition file
-/expert-agency:assemble path/to/team.yml
+## Your knowledge base structure
 
-# Spawn a single expert agent
-/expert-agency:spawn chip-huyen
-/expert-agency:spawn martin-fowler
-
-# Invoke an assembled agent
-@chip-huyen review this RAG pipeline
-@martin-fowler is this design correct?
-```
-
-## Directory structure expected
-
-The plugin is path-agnostic. It works with any structure as long as each expert has a `brain.md`:
+Council is path-agnostic. It works with any directory layout as long as each expert has a `brain.md`:
 
 ```
 your-experts-clones/
-├── any-category/
-│   └── expert-slug/
-│       ├── brain.md      # required — frontmatter + knowledge
-│       └── soul.md       # optional — voice/consulting override
-└── topics-index.yml      # optional — enables topic routing
+├── ai-engineering/
+│   └── chip-huyen/
+│       ├── brain.md        ← required
+│       └── soul.md         ← optional: fine-grained voice control
+├── software-engineering/
+│   └── martin-fowler/
+│       └── brain.md
+└── topics-index.yml        ← optional: enables topic routing
 ```
 
-## brain.md frontmatter (required fields)
+### brain.md — required frontmatter
 
 ```yaml
 ---
-name: Full Name
-slug: first-last
-area: category-name
-topics: [topic-1, topic-2]
-key_concepts: [concept-1, concept-2]
-pairs_well_with: [other-slug]
-use_when: "when to invoke this expert — one sentence"
+name: Chip Huyen
+slug: chip-huyen
+area: ai-engineering
+topics: [rag, evals, llmops, production-ai]
+key_concepts: [productionization-gap, eval-first, data-flywheel]
+pairs_well_with: [eugene-yan, shreya-shankar]
+use_when: "LLM systems in production, eval pipelines, RAG architecture, inference cost"
 ---
 ```
 
-See `templates/brain-template.md` for the full structure.
+Full template: [`templates/brain-template.md`](templates/brain-template.md)
 
-## soul.md (optional)
+### soul.md — optional voice override
 
-Overrides the consulting section of `brain.md` for the generated agent's system prompt. Use when you want fine-grained control over the agent's voice beyond what the brain.md provides.
+Overrides the consulting section of `brain.md`. Use when you want precise control over the agent's voice beyond the brain.
 
-See `templates/soul-template.md` for the format.
+Template: [`templates/soul-template.md`](templates/soul-template.md)
 
-## team.yml (optional)
+### topics-index.yml — optional topic routing
 
-Define a named team of experts to assemble together:
+Enables `/council:assemble <topic>` to route to the right experts automatically:
 
 ```yaml
-name: my-team
+rag:
+  - slug: chip-huyen
+    priority: primary
+  - slug: eugene-yan
+    priority: secondary
+
+evals:
+  - slug: shreya-shankar
+    priority: primary
+  - slug: chip-huyen
+    priority: secondary
+```
+
+---
+
+## Usage
+
+### Spawn a single expert
+
+```
+/council:spawn chip-huyen
+```
+
+Generates `.claude/agents/chip-huyen.md` and makes the agent available immediately.
+
+```
+@chip-huyen review this RAG pipeline
+@chip-huyen should I fine-tune or keep prompting?
+```
+
+### Assemble a team by topic
+
+```
+/council:assemble rag
+```
+
+Council reads your `topics-index.yml`, resolves the matching experts, and generates one agent file per expert in `.claude/agents/`.
+
+```
+Assembled team for: rag
+Output: .claude/agents/
+
+Agent          | Expert        | File
+---------------|---------------|------------------
+chip-huyen     | Chip Huyen    | chip-huyen.md
+eugene-yan     | Eugene Yan    | eugene-yan.md
+
+Agents are active. Invoke with @chip-huyen or @eugene-yan.
+```
+
+### Assemble from a team file
+
+```
+/council:assemble path/to/team.yml
+```
+
+```yaml
+# team.yml
+name: my-rag-team
 experts:
   - slug: chip-huyen
   - slug: eugene-yan
+  - slug: jason-liu
 ```
 
-See `templates/team.yml.example`.
+---
 
 ## Examples
 
-`examples/deep-clone/` — Chip Huyen: full brain.md with all sections
-`examples/simple-clone/` — Martin Fowler: minimal brain.md with just the essentials
+The `examples/` directory includes two reference clones:
 
-Use these as reference when creating your own clones.
+- **`deep-clone/`** — Chip Huyen: full `brain.md` with all sections
+- **`simple-clone/`** — Martin Fowler: minimal `brain.md` with just the essentials
+
+Run `/council:setup` and choose to copy one of these into your knowledge base to get started.
+
+---
+
+## How agents work
+
+Generated agents are standard Claude Code agent files (`.claude/agents/*.md`). They:
+
+- Load your `brain.md` on demand — only the relevant sections
+- Respond in the expert's voice, using their frameworks
+- Defer to other experts when appropriate (`"For evals, ask @shreya-shankar"`)
+- Are scoped to the project (or user-wide, your choice)
+
+Council generates them; Claude Code runs them. No magic — just well-structured prompts from your own notes.
+
+---
 
 ## Config
 
-After setup, `~/.claude/plugins/expert-agency/config.yml` contains:
+After setup, `config.yml` is written to the plugin directory:
 
 ```yaml
-experts_clones_path: ~/path/to/experts-clones
-topics_index_path: ~/path/to/topics-index.yml  # or "none"
-agents_output_scope: project | user | ask
+experts_clones_path: ~/brain/knowledge/experts-clones
+topics_index_path: ~/brain/knowledge/experts-clones/topics-index.yml
+agents_output_scope: project   # project | user | ask
 ```
 
-Re-run `/expert-agency:setup` to update it.
+Re-run `/council:setup` to update it.
+
+---
+
+## License
+
+MIT
