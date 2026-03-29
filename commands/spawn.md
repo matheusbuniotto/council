@@ -19,7 +19,15 @@ Extract `experts_clones_path`, `agents_output_scope`.
 
 Parse `$ARGUMENTS` for the slug and any flag (`--ephemeral`, `--persist`, `--user`).
 
-If no slug given: ask "Which expert? (e.g. chip-huyen, martin-fowler)"
+If no slug given:
+- Glob `{experts_clones_path}/**/brain.md` and read the first 10 lines of each to extract `name`, `slug`, `use_when`.
+- Build a list of up to 4 options from the results (prioritize by directory order).
+- Use AskUserQuestion:
+  - header: "Pick expert"
+  - question: "Which expert do you want to spawn?"
+  - options: one per expert — label: `{slug}`, description: `{use_when}`
+  - If more than 4 experts exist, add an option: label: "Other" — description: "I'll type the slug."
+- If user picks "Other": ask as follow-up "Type the slug:"
 
 Search for `{experts_clones_path}/**/{slug}/brain.md` using Glob.
 

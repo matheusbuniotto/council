@@ -54,6 +54,7 @@ The setup wizard will ask for:
 | `/council:spawn <slug>` | Spawn a single expert agent — prompts for ephemeral or persistent |
 | `/council:assemble <topic>` | Assemble a team by topic — prompts for ephemeral or persistent |
 | `/council:assemble <team.yml>` | Assemble from a named team definition file |
+| `/council:list` | List all active agents — ephemeral and persistent, grouped by scope |
 | `/council:dismiss` | Remove all ephemeral agents from this session |
 
 Flags skip the mode prompt: `--ephemeral`, `--persist`, `--user`.

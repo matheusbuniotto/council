@@ -21,11 +21,14 @@ Do NOT activate for:
 
 ## How to detect a match
 
-Read `${CLAUDE_PLUGIN_ROOT}/config.yml` to get `topics_index_path`.
+Read `${CLAUDE_PLUGIN_ROOT}/config.yml`.
 
-If `topics_index_path` is `"none"` or the file doesn't exist: skip — no topic routing available.
+If the file doesn't exist: use `topics_index_path = none`.
+If it exists but `topics_index_path` is missing or `"none"`: skip — no topic routing available.
 
-Read the `topics-index.yml`. Extract all topic keys (e.g. `rag`, `evals`, `architecture`, `python`).
+Read the `topics-index.yml` at the resolved path. If the file doesn't exist at that path: skip silently.
+
+Extract all topic keys (e.g. `rag`, `evals`, `architecture`, `python`).
 
 Match the current conversation context against those keys. Use semantic matching — "retrieval pipeline" → `rag`, "test coverage" → `testing`, "async python" → `python-async`.
 
