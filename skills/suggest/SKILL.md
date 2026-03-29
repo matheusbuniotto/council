@@ -52,8 +52,11 @@ Rules:
 
 Run:
 ```
-/council:spawn {slug}
+/council:spawn {slug} --ephemeral
 ```
+
+Ephemeral by default — the suggestion was contextual, not a permanent addition.
+The user can always re-spawn persistently with `/council:spawn {slug} --persist`.
 
 Then let the user invoke `@{slug}` naturally. Do not pre-load or summarize the expert's views — let the agent do that.
 
