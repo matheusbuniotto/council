@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 # council — cleanup ephemeral agents
-# Usage: bash cleanup.sh [--dry-run]
-#
-# Reads ~/.council-ephemeral-agents and removes all listed files.
-# Called automatically by /council:dismiss, or manually by the user.
+# Usage: bash cleanup.sh <plugin_root> [--dry-run]
 
-REGISTRY="$HOME/.council-ephemeral-agents"
+PLUGIN_ROOT="${1:-}"
+if [[ -z "$PLUGIN_ROOT" ]]; then
+  echo "ERROR: plugin root path required as first argument" >&2
+  exit 1
+fi
+
+REGISTRY="$PLUGIN_ROOT/ephemeral-registry"
 DRY_RUN=false
-[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
+[[ "${2:-}" == "--dry-run" ]] && DRY_RUN=true
 
 BOLD='\033[1m'
 GREEN='\033[0;32m'
 DIM='\033[2m'
 YELLOW='\033[0;33m'
-RED='\033[0;31m'
 RESET='\033[0m'
 CHECK="${GREEN}✓${RESET}"
 WARN="${YELLOW}⚠${RESET}"

@@ -10,7 +10,7 @@ You are spawning a single expert agent. Language: match the user's language.
 Read `${CLAUDE_PLUGIN_ROOT}/config.yml`.
 
 If missing or invalid: use these defaults silently and continue:
-- `experts_clones_path`: `~/experts-clones`
+- `experts_clones_path`: `${CLAUDE_PLUGIN_ROOT}/examples`
 - `agents_output_scope`: `ask`
 
 Extract `experts_clones_path`, `agents_output_scope`.
@@ -72,7 +72,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/templates/agent-template.md`. Fill and write to outp
 
 ## Register ephemeral
 
-If mode is `ephemeral`: append the output path as a new line to `~/.council-ephemeral-agents`.
+If mode is `ephemeral`: append the output path as a new line to `${CLAUDE_PLUGIN_ROOT}/ephemeral-registry`.
 
 ## Report
 

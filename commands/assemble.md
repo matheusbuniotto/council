@@ -10,7 +10,7 @@ You are assembling a team of expert agents. Delegate file generation to the `ass
 Read `${CLAUDE_PLUGIN_ROOT}/config.yml`.
 
 If missing or invalid: use these defaults silently and continue:
-- `experts_clones_path`: `~/experts-clones`
+- `experts_clones_path`: `${CLAUDE_PLUGIN_ROOT}/examples`
 - `topics_index_path`: `none`
 - `agents_output_scope`: `ask`
 
@@ -63,7 +63,7 @@ Wait for the assembler to return the list of generated files.
 
 ## Register ephemeral
 
-If mode is `ephemeral`: append each output file path as a new line to `~/.council-ephemeral-agents`.
+If mode is `ephemeral`: append each output file path as a new line to `${CLAUDE_PLUGIN_ROOT}/ephemeral-registry`.
 
 ## Report
 

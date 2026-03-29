@@ -6,7 +6,7 @@ allowed-tools: Bash
 Remove all ephemeral council agents registered for this session.
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/cleanup.sh"
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/cleanup.sh" "${CLAUDE_PLUGIN_ROOT}"
 ```
 
 If the script reports nothing to clean up, say: "No ephemeral agents found."

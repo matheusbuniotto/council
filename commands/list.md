@@ -11,7 +11,7 @@ Run these in parallel:
 
 ```bash
 # Ephemeral registry
-cat ~/.council-ephemeral-agents 2>/dev/null
+cat ${CLAUDE_PLUGIN_ROOT}/ephemeral-registry 2>/dev/null
 ```
 
 ```bash
@@ -28,7 +28,7 @@ ls ~/.claude/agents/*.md 2>/dev/null
 
 For each `.md` file found: read the first 5 lines to extract `name` and `description` from frontmatter.
 
-Cross-reference with `~/.council-ephemeral-agents` to determine if ephemeral or persistent.
+Cross-reference with `${CLAUDE_PLUGIN_ROOT}/ephemeral-registry` to determine if ephemeral or persistent.
 
 ## Report
 

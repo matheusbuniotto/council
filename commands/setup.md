@@ -26,11 +26,11 @@ Ask with AskUserQuestion:
 - question: "Where is your experts-clones directory? Type the path below (e.g. ~/brain/knowledge/experts-clones). If you're not sure yet, choose 'Use default' to configure manually later."
 - options:
   - label: "I'll type it" — description: "Ask me for the path."
-  - label: "Use default" — description: "Sets path to ~/experts-clones — you can edit config.yml later."
+  - label: "Use default" — description: "Sets path to ${CLAUDE_PLUGIN_ROOT}/examples — you can edit config.yml later."
 
 If "I'll type it": ask as a follow-up message "Path to experts-clones:". Expand `~` to full home path. Check if the directory exists with Glob. If not found, warn but continue.
 
-If "Use default": use `~/experts-clones` expanded to full home path.
+If "Use default": use `${CLAUDE_PLUGIN_ROOT}/examples` expanded to full home path.
 
 ## Step 3 — Topics index
 
