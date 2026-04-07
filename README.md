@@ -30,13 +30,19 @@ claude plugin marketplace add https://github.com/matheusbuniotto/council
 claude plugin install council@council
 ```
 
-Then, **run the setup wizard directly in your terminal** (it's interactive — needs a real TTY). Use your actual plugin install root (marketplace paths are versioned), e.g.:
+Then run the **setup wizard** once. It is interactive, so run it where you have a normal TTY (system terminal or Claude Code’s terminal).
+
+**Do not** copy a hardcoded path like `~/.claude/plugins/cache/council/council/0.x.x/` from old docs. Marketplace plugins are copied into an internal **cache** folder whose name includes the version; that string changes every release, so it is a bad thing to document.
+
+**Recommended — from Claude Code** (Bash tool or integrated terminal; `${CLAUDE_PLUGIN_ROOT}` is set for the council plugin):
 
 ```bash
-bash /path/to/installed/council/scripts/setup.sh /path/to/installed/council
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh" "${CLAUDE_PLUGIN_ROOT}"
 ```
 
-Or from inside Claude Code, run `/council:setup` and it will give you the exact command to paste (or use Bash with `${CLAUDE_PLUGIN_ROOT}` if exposed in your environment).
+**Or** run `/council:setup` in chat and paste whatever command it prints for your machine.
+
+**From a plain terminal outside Claude Code** you may not have `${CLAUDE_PLUGIN_ROOT}`. In that case use `/council:setup` inside Claude once, or locate the installed plugin directory from Claude Code’s plugin UI and run `scripts/setup.sh` with that directory as both arguments.
 
 The setup wizard will ask for:
 - Your `experts-clones/` directory path
