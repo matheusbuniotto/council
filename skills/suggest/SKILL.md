@@ -63,6 +63,8 @@ The user can always re-spawn persistently with `/council:spawn {slug} --persist`
 
 Then let the user invoke `@{slug}` naturally. Do not pre-load or summarize the expert's views — let the agent do that.
 
+Ephemeral agents for this project are tracked under `.claude/council/ephemeral-registry`; `/council:dismiss` cleans only those paths.
+
 ## If the user says no
 
 Acknowledge and drop it. Do not suggest the same expert again in this session.

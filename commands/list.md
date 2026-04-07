@@ -7,28 +7,28 @@ You are listing active council agents. Language: match the user's language.
 
 ## Find active agents
 
-Run these in parallel:
+Run these in parallel (use `$PWD` for the current project — do not leave `{cwd}` literal in shell):
 
 ```bash
-# Ephemeral registry
-cat ${CLAUDE_PLUGIN_ROOT}/ephemeral-registry 2>/dev/null
+# Ephemeral registry for this project (absolute paths, one per line)
+cat "${PWD}/.claude/council/ephemeral-registry" 2>/dev/null
 ```
 
 ```bash
 # Project agents
-ls {cwd}/.claude/agents/*.md 2>/dev/null
+ls "${PWD}/.claude/agents/"*.md 2>/dev/null
 ```
 
 ```bash
 # User agents
-ls ~/.claude/agents/*.md 2>/dev/null
+ls "${HOME}/.claude/agents/"*.md 2>/dev/null
 ```
 
 ## Read frontmatter for each agent
 
-For each `.md` file found: read the first 5 lines to extract `name` and `description` from frontmatter.
+For each `.md` file found: read the first ~30 lines to extract `name` and `description` from YAML frontmatter.
 
-Cross-reference with `${CLAUDE_PLUGIN_ROOT}/ephemeral-registry` to determine if ephemeral or persistent.
+A project-scoped agent file is **ephemeral** if its absolute path appears in `${PWD}/.claude/council/ephemeral-registry`. Otherwise it is **persistent** (project). User-scope files under `~/.claude/agents/` are always **persistent**.
 
 ## Report
 

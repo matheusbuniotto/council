@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
-# council — cleanup ephemeral agents
-# Usage: bash cleanup.sh <plugin_root> [--dry-run]
+# council — remove ephemeral agent files listed in a project-local registry
+# Usage: bash cleanup.sh [--dry-run] <registry_file>
+#
+# registry_file: absolute path, usually <project>/.claude/council/ephemeral-registry
+# Each line is an absolute path to a generated agent .md file.
 
-PLUGIN_ROOT="${1:-}"
-if [[ -z "$PLUGIN_ROOT" ]]; then
-  echo "ERROR: plugin root path required as first argument" >&2
-  exit 1
+DRY_RUN=false
+if [[ "${1:-}" == "--dry-run" ]]; then
+  DRY_RUN=true
+  shift
 fi
 
-REGISTRY="$PLUGIN_ROOT/ephemeral-registry"
-DRY_RUN=false
-[[ "${2:-}" == "--dry-run" ]] && DRY_RUN=true
+REGISTRY="${1:-}"
+if [[ -z "$REGISTRY" ]]; then
+  echo "ERROR: registry file path required (e.g. \$PWD/.claude/council/ephemeral-registry)" >&2
+  echo "Usage: bash cleanup.sh [--dry-run] <registry_file>" >&2
+  exit 1
+fi
 
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -21,7 +27,7 @@ CHECK="${GREEN}✓${RESET}"
 WARN="${YELLOW}⚠${RESET}"
 
 if [[ ! -f "$REGISTRY" ]]; then
-  echo -e "  ${DIM}No ephemeral agents to clean up.${RESET}"
+  echo -e "  ${DIM}No ephemeral registry at this project (${REGISTRY}).${RESET}"
   exit 0
 fi
 
@@ -44,8 +50,13 @@ while IFS= read -r filepath; do
 done < "$REGISTRY"
 
 if ! $DRY_RUN; then
-  rm "$REGISTRY"
+  rm -f "$REGISTRY"
+  # Remove empty council dir if nothing else left
+  council_dir="$(dirname "$REGISTRY")"
+  if [[ -d "$council_dir" ]] && [[ -z "$(ls -A "$council_dir" 2>/dev/null)" ]]; then
+    rmdir "$council_dir" 2>/dev/null || true
+  fi
   echo ""
-  echo -e "  ${BOLD}Done.${RESET} Removed $removed ephemeral agent(s)."
-  [[ $skipped -gt 0 ]] && echo -e "  ${DIM}$skipped file(s) already gone — skipped.${RESET}"
+  echo -e "  ${BOLD}Done.${RESET} Removed $removed ephemeral agent file(s)."
+  [[ $skipped -gt 0 ]] && echo -e "  ${DIM}$skipped path(s) already gone — skipped.${RESET}"
 fi

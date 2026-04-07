@@ -38,6 +38,7 @@ If `--ephemeral` flag → mode = `ephemeral`
 If `--persist` flag  → mode = `project`
 If `--user` flag     → mode = `user`
 
+If no flag and `agents_output_scope` is `ephemeral` → mode = `ephemeral`, skip prompt (recommended default for trying experts without committing agent files to git).
 If no flag and `agents_output_scope` is `project` → mode = `project`, skip prompt.
 If no flag and `agents_output_scope` is `user`    → mode = `user`, skip prompt.
 
@@ -69,9 +70,15 @@ Check if `{experts_clones_path}/**/{slug}/soul.md` exists. If yes: read it.
 
 Read `${CLAUDE_PLUGIN_ROOT}/templates/agent-template.md`. Fill and write to output path.
 
-## Register ephemeral
+## Register ephemeral (project-local)
 
-If mode is `ephemeral`: append the output path as a new line to `${CLAUDE_PLUGIN_ROOT}/ephemeral-registry`.
+Ephemeral agents must be tracked **per project** so `/council:dismiss` and multi-repo workflows do not leak or delete the wrong files. Never write the registry under `${CLAUDE_PLUGIN_ROOT}`.
+
+If mode is `ephemeral`:
+
+1. Resolve `registry_dir` = `{cwd}/.claude/council` and `registry_file` = `{cwd}/.claude/council/ephemeral-registry`.
+2. Run `mkdir -p` on `registry_dir` (Bash is allowed).
+3. Append the **absolute** path of the generated agent file as a single new line to `registry_file` (use Write to read-modify-write, or Bash `>>` with absolute path).
 
 ## Report
 

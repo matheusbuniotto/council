@@ -189,19 +189,21 @@ esac
 
 # ── step 4: agents output scope ───────────────────────────────────────────────
 header 4 4 "Agent output scope"
-info "Where should generated agent files be written by default?"
+info "Default lifecycle for spawned/assembled agents (override anytime with flags)."
 echo ""
-echo -e "  ${DIM}1)${RESET} project  ${DIM}— .claude/agents/ in the current project ${CYAN}(recommended)${RESET}"
-echo -e "  ${DIM}2)${RESET} user     ${DIM}— ~/.claude/agents/ (available in all projects)${RESET}"
-echo -e "  ${DIM}3)${RESET} ask      ${DIM}— prompt me every time${RESET}"
+echo -e "  ${DIM}1)${RESET} ephemeral ${DIM}— session-first; tracked in ${CYAN}.claude/council/${RESET}${DIM}, removed with /council:dismiss ${GREEN}(recommended for experiments)${RESET}"
+echo -e "  ${DIM}2)${RESET} project     ${DIM}— persistent in .claude/agents/ in each project${RESET}"
+echo -e "  ${DIM}3)${RESET} user        ${DIM}— persistent in ~/.claude/agents/${RESET}"
+echo -e "  ${DIM}4)${RESET} ask         ${DIM}— prompt every time${RESET}"
 echo ""
-prompt "Choice [1/2/3]:"
+prompt "Choice [1/2/3/4] (default 1):"
 read -r scope_choice
 
 case "$scope_choice" in
-  2) AGENTS_SCOPE="user" ;;
-  3) AGENTS_SCOPE="ask" ;;
-  *) AGENTS_SCOPE="project" ;;
+  2) AGENTS_SCOPE="project" ;;
+  3) AGENTS_SCOPE="user" ;;
+  4) AGENTS_SCOPE="ask" ;;
+  *) AGENTS_SCOPE="ephemeral" ;;
 esac
 
 success "Scope: $AGENTS_SCOPE"
@@ -221,10 +223,11 @@ experts_clones_path: $EXPERTS_PATH
 # Set to "none" to disable topic routing (/council:assemble <topic>)
 topics_index_path: $TOPICS_INDEX_PATH
 
-# Default scope for generated agent files
-# project → .claude/agents/ in current working directory
-# user    → ~/.claude/agents/ (available in all projects)
-# ask     → prompt every time
+# Default lifecycle for generated agent files
+# ephemeral → write to .claude/agents/ but register paths in .claude/council/ephemeral-registry (dismiss removes them)
+# project   → persistent .claude/agents/ in current working directory
+# user      → persistent ~/.claude/agents/
+# ask       → prompt every time
 agents_output_scope: $AGENTS_SCOPE
 EOF
 

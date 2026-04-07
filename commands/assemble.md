@@ -26,6 +26,7 @@ If `--ephemeral` flag → mode = `ephemeral`
 If `--persist` flag  → mode = `project`
 If `--user` flag     → mode = `user`
 
+If no flag and `agents_output_scope` is `ephemeral` → mode = `ephemeral`, skip prompt.
 If no flag and `agents_output_scope` is `project` → mode = `project`, skip prompt.
 If no flag and `agents_output_scope` is `user`    → mode = `user`, skip prompt.
 
@@ -59,9 +60,15 @@ template_path: ${CLAUDE_PLUGIN_ROOT}/templates/agent-template.md
 
 Wait for the assembler to return the list of generated files.
 
-## Register ephemeral
+## Register ephemeral (project-local)
 
-If mode is `ephemeral`: append each output file path as a new line to `${CLAUDE_PLUGIN_ROOT}/ephemeral-registry`.
+Same rules as `/council:spawn`: ephemeral tracking is **per project**, not in the plugin install directory.
+
+If mode is `ephemeral`:
+
+1. `registry_dir` = `{cwd}/.claude/council`, `registry_file` = `{cwd}/.claude/council/ephemeral-registry`.
+2. `mkdir -p` on `registry_dir`.
+3. Append each **absolute** output `.md` path as its own line to `registry_file`.
 
 ## Report
 

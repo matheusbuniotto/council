@@ -1,0 +1,8 @@
+# council (optional) — ignore generated agent state in git
+# Ephemeral registry (per project):
+.claude/council/
+
+# If you use persistent project agents but do not want them in the repo, ignore the folder:
+# .claude/agents/
+
+# Often you *do* commit hand-curated agents; only uncomment .claude/agents/ if you want zero generated files tracked.
