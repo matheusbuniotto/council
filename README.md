@@ -175,12 +175,18 @@ experts:
 
 ## Examples
 
-The `examples/` directory includes two reference clones:
+The `examples/` directory includes starter clones you can use right away:
 
-- **`deep-clone/`** — Chip Huyen: full `brain.md` with all sections
-- **`simple-clone/`** — Martin Fowler: minimal `brain.md` with just the essentials
+| Clone | Expert | Domain | Depth |
+|-------|--------|--------|-------|
+| `deep-clone/` | Chip Huyen | AI/ML Engineering | Full — all sections |
+| `simple-clone/` | Martin Fowler | Software Engineering | Minimal — just essentials |
+| `uncle-bob/` | Robert C. Martin | Clean Code, SOLID | Full — universally known |
+| `karpathy/` | Andrej Karpathy | Deep Learning, Neural Nets | Full — universally known |
 
-Run `/council:setup` and choose to copy one of these into your knowledge base to get started.
+**Uncle Bob** and **Karpathy** are ready-to-use brains that everyone recognizes — great for trying Council without creating your own first.
+
+Run `/council:setup` and choose to copy any of these into your knowledge base to get started.
 
 ---
 
