@@ -30,28 +30,44 @@ claude plugin marketplace add https://github.com/matheusbuniotto/council
 claude plugin install council@council
 ```
 
-Then run the **setup wizard** once. It is interactive, so run it where you have a normal TTY (system terminal or Claude Code’s terminal).
+### Setup Wizard
 
-**Do not** copy a hardcoded path like `~/.claude/plugins/cache/council/council/0.x.x/` from old docs. Marketplace plugins are copied into an internal **cache** folder whose name includes the version; that string changes every release, so it is a bad thing to document.
+Run the setup wizard once to configure your knowledge base paths:
 
-**Recommended — from Claude Code** (Bash tool or integrated terminal; `${CLAUDE_PLUGIN_ROOT}` is set for the council plugin):
+**Option A — Directly in Claude Code chat:**
+```
+/council:setup
+```
+This runs an interactive multi-choice wizard using native Claude Code prompts.
 
+**Option B — From terminal or scripts:**
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh" "${CLAUDE_PLUGIN_ROOT}"
 ```
 
-**Or** run `/council:setup` in chat and paste whatever command it prints for your machine.
+**Non-interactive / Scripted setup:**
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh" "${CLAUDE_PLUGIN_ROOT}" \
+  --experts-path ~/brain/knowledge/experts-clones \
+  --topics-index ~/brain/knowledge/experts-clones/topics-index.yml \
+  --scope ephemeral \
+  --force \
+  --quiet
+```
 
-**From a plain terminal outside Claude Code** you may not have `${CLAUDE_PLUGIN_ROOT}`. In that case use `/council:setup` inside Claude once, or locate the installed plugin directory from Claude Code’s plugin UI and run `scripts/setup.sh` with that directory as both arguments.
-
-The setup wizard will ask for:
-- Your `experts-clones/` directory path
-- Your `topics-index.yml` path (optional — enables `/council:assemble <topic>`)
-- Default agent lifecycle: **ephemeral** (recommended for experiments), **project** (persistent in repo), **user** (`~/.claude/agents/`), or **ask** each time
+Options supported by `scripts/setup.sh`:
+- `--experts-path <path>`: Directory containing your `brain.md` notes
+- `--topics-index <path>`: Path to `topics-index.yml` (or `none`)
+- `--scope <mode>`: Default lifecycle (`ephemeral`, `project`, `user`, or `ask`)
+- `--example <type>`: Copy starter clone (`deep-clone`, `simple-clone`, `none`)
+- `-y`, `--yes`, `--force`: Skip overwrite confirmation prompts
+- `-q`, `--quiet`: Suppress non-error output
 
 ---
 
-## Commands
+## Commands & Skills
+
+### Slash Commands (`commands/`)
 
 | Command | What it does |
 |---|---|
@@ -60,9 +76,29 @@ The setup wizard will ask for:
 | `/council:assemble <topic>` | Assemble a team by topic — prompts for ephemeral or persistent |
 | `/council:assemble <team.yml>` | Assemble from a named team definition file |
 | `/council:list` | List all active agents — ephemeral and persistent, grouped by scope |
-| `/council:dismiss` | Remove **this project's** ephemeral agents (paths listed in `.claude/council/ephemeral-registry`) |
+| `/council:dismiss` | Remove **this project's** ephemeral agents |
 
 Flags skip the mode prompt: `--ephemeral`, `--persist`, `--user`.
+
+### Contextual Radar Skill (`skills/suggest`)
+
+Council includes an autonomous background skill that observes technical discussions and suggests relevant experts when your knowledge base covers the topic. Suggestions are polite, non-intrusive, and require your explicit confirmation before spawning.
+
+---
+
+## Safety & Lifecycle Hooks
+
+Council leverages official Claude Code plugin hooks (`hooks/hooks.json`) for safety and session hygiene:
+
+1. **Knowledge Base Guard (`PreToolUse`)**
+   - Intercepts file modification tools (`Write`, `Edit`).
+   - Automatically blocks any attempt by agents or subagents to edit, overwrite, or delete files inside your `experts_clones_path`.
+   - Your personal notes and expert brains remain strictly read-only consultants.
+
+2. **Session Health (`SessionStart`)**
+   - Automatically checks project status when a session opens.
+   - Gently alerts you if uncleaned ephemeral agents remain in `.claude/council/ephemeral-registry`.
+   - Reminds you if `/council:setup` has not yet been configured.
 
 ---
 
@@ -189,60 +225,27 @@ The `examples/` directory includes starter clones you can use right away:
 | `uncle-bob/` | Robert C. Martin | Clean Code, SOLID | Full — universally known |
 | `karpathy/` | Andrej Karpathy | Deep Learning, Neural Nets | Full — universally known |
 
-**Uncle Bob** and **Karpathy** are ready-to-use brains that everyone recognizes — great for trying Council without creating your own first.
-
 Run `/council:setup` and choose to copy any of these into your knowledge base to get started.
-
----
-
-## How agents work
-
-Generated agents are standard Claude Code agent files (`.claude/agents/*.md`). They:
-
-- Load your `brain.md` on demand — only the relevant sections
-- Respond in the expert's voice, using their frameworks
-- Defer to other experts when appropriate (`"For evals, invoke shreya-shankar"`)
-- Are scoped to the project (or user-wide, your choice)
-
-Council generates them; Claude Code runs them. No magic — just well-structured prompts from your own notes.
 
 ---
 
 ## Ephemeral agents (recommended default)
 
-**Ephemeral** agents are still files under `.claude/agents/`, but their paths are recorded in **`.claude/council/ephemeral-registry`** in the same project. `/council:dismiss` deletes only those files and clears the registry — it does not touch persistent agents you spawned with `--persist` / user scope / non-ephemeral defaults.
-
-Why this shape:
-
-- **Project-scoped registry** avoids one global list under the plugin install directory (which mixed repos and made `/council:dismiss` unsafe in multi-project work).
-- **`${CLAUDE_PLUGIN_ROOT}`** is only for bundled templates and `config.yml` — never for session state.
+**Ephemeral** agents are generated files under `.claude/agents/`, recorded in **`.claude/council/ephemeral-registry`** in the project directory. `/council:dismiss` deletes only those files and clears the registry. It never touches persistent agents created with `--persist` or user scope.
 
 Override any default with flags: `--ephemeral`, `--persist` (project persistent), `--user`.
 
-### Git
-
-If you do not want generated agents or council state in git, add the snippet from [`templates/gitignore-snippet.txt`](templates/gitignore-snippet.txt) to your project `.gitignore`. Many teams commit a few hand-picked `.claude/agents/*.md` files — adjust to taste.
-
 ---
 
-## Upgrade note (0.1.x → 0.2.0)
+## Testing & Verification
 
-Older installs tracked ephemeral agents in `ephemeral-registry` next to `config.yml` inside the plugin directory. That file is no longer used. After upgrading, you can delete any leftover `ephemeral-registry` file in the plugin folder; new spawns use `.claude/council/ephemeral-registry` per project.
+Council includes a comprehensive test suite covering manifest validation, frontmatter schemas, shell scripts, and lifecycle hook interception:
 
----
-
-## Config
-
-After setup, `config.yml` is written to the plugin directory:
-
-```yaml
-experts_clones_path: ~/brain/knowledge/experts-clones
-topics_index_path: ~/brain/knowledge/experts-clones/topics-index.yml
-# ephemeral | project | user | ask
-agents_output_scope: ephemeral
+```bash
+bash tests/run_all.sh
 ```
 
-Re-run `/council:setup` to update it.
+Continuous integration runs automatically on push and pull request via GitHub Actions.
 
 ---
 
