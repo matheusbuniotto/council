@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # council — interactive mode picker for spawn/assemble
 #
-# Usage: bash pick-mode.sh <context> [--ephemeral|--persist]
+# Usage: bash pick-mode.sh <context> [--ephemeral|--persist|--user]
 #   context: "spawn <slug>" or "assemble <topic>"
 #
 # Exits 0 and prints one of: ephemeral | project | user
 # All visual output goes to stderr so Claude can capture stdout cleanly.
+
+set -euo pipefail
 
 CONTEXT="${1:-}"
 FLAG="${2:-}"
@@ -28,6 +30,12 @@ case "$FLAG" in
   --user)      echo "user";      exit 0 ;;
 esac
 
+# ── non-interactive fallback ──────────────────────────────────────────────────
+if [[ ! -t 0 ]]; then
+  echo "ephemeral"
+  exit 0
+fi
+
 # ── interactive picker ────────────────────────────────────────────────────────
 echo "" >&2
 divider
@@ -41,12 +49,12 @@ echo -e "  ${DIM}2)${RESET} ${BOLD}project${RESET}    ${DIM}— saved to .claude
 echo -e "  ${DIM}3)${RESET} ${BOLD}user${RESET}       ${DIM}— saved to ~/.claude/agents/ across all projects${RESET}" >&2
 echo "" >&2
 echo -ne "  ${ARROW} Choice [1/2/3]: " >&2
-read -r choice
+read -r choice || choice="1"
 
 echo "" >&2
 
 case "$choice" in
   2) echo "project" ;;
   3) echo "user" ;;
-  *) echo "ephemeral" ;;  # default to ephemeral on enter or 1
+  *) echo "ephemeral" ;;
 esac

@@ -1,20 +1,55 @@
 #!/usr/bin/env bash
 # council — remove ephemeral agent files listed in a project-local registry
-# Usage: bash cleanup.sh [--dry-run] <registry_file>
-#
-# registry_file: absolute path, usually <project>/.claude/council/ephemeral-registry
-# Each line is an absolute path to a generated agent .md file.
+# Usage: bash cleanup.sh [options] <registry_file>
+
+set -euo pipefail
 
 DRY_RUN=false
-if [[ "${1:-}" == "--dry-run" ]]; then
-  DRY_RUN=true
-  shift
-fi
+QUIET=false
+REGISTRY=""
 
-REGISTRY="${1:-}"
+usage() {
+  cat <<EOF
+Usage: bash cleanup.sh [options] <registry_file>
+
+Arguments:
+  <registry_file>     Path to .claude/council/ephemeral-registry
+
+Options:
+  -n, --dry-run       Show files that would be removed without deleting
+  -q, --quiet         Suppress non-error output
+  -h, --help          Show this help message
+EOF
+  exit 0
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      usage
+      ;;
+    -n|--dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    -q|--quiet)
+      QUIET=true
+      shift
+      ;;
+    *)
+      if [[ -z "$REGISTRY" ]]; then
+        REGISTRY="$1"
+        shift
+      else
+        echo "ERROR: Unknown argument: $1" >&2
+        exit 1
+      fi
+      ;;
+  esac
+done
+
 if [[ -z "$REGISTRY" ]]; then
   echo "ERROR: registry file path required (e.g. \$PWD/.claude/council/ephemeral-registry)" >&2
-  echo "Usage: bash cleanup.sh [--dry-run] <registry_file>" >&2
   exit 1
 fi
 
@@ -27,21 +62,31 @@ CHECK="${GREEN}✓${RESET}"
 WARN="${YELLOW}⚠${RESET}"
 
 if [[ ! -f "$REGISTRY" ]]; then
-  echo -e "  ${DIM}No ephemeral registry at this project (${REGISTRY}).${RESET}"
+  [[ "$QUIET" == "true" ]] || echo -e "  ${DIM}No ephemeral registry at this project (${REGISTRY}).${RESET}"
   exit 0
 fi
 
 removed=0
 skipped=0
 
-while IFS= read -r filepath; do
+while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
+  # Trim leading/trailing whitespace
+  filepath="$(echo "$raw_line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
   [[ -z "$filepath" ]] && continue
+  
+  # Safety check: must be an absolute path ending with .md
+  if [[ "$filepath" != /* ]] || [[ "$filepath" != *.md ]]; then
+    [[ "$QUIET" == "true" ]] || echo -e "  ${WARN} Skipping non-agent path: ${DIM}$filepath${RESET}" >&2
+    skipped=$((skipped + 1))
+    continue
+  fi
+
   if [[ -f "$filepath" ]]; then
     if $DRY_RUN; then
-      echo -e "  ${WARN} would remove: ${DIM}$filepath${RESET}"
+      [[ "$QUIET" == "true" ]] || echo -e "  ${WARN} would remove: ${DIM}$filepath${RESET}"
     else
-      rm "$filepath"
-      echo -e "  ${CHECK} removed: ${DIM}$filepath${RESET}"
+      rm -f "$filepath"
+      [[ "$QUIET" == "true" ]] || echo -e "  ${CHECK} removed: ${DIM}$filepath${RESET}"
       removed=$((removed + 1))
     fi
   else
@@ -51,12 +96,13 @@ done < "$REGISTRY"
 
 if ! $DRY_RUN; then
   rm -f "$REGISTRY"
-  # Remove empty council dir if nothing else left
   council_dir="$(dirname "$REGISTRY")"
   if [[ -d "$council_dir" ]] && [[ -z "$(ls -A "$council_dir" 2>/dev/null)" ]]; then
     rmdir "$council_dir" 2>/dev/null || true
   fi
-  echo ""
-  echo -e "  ${BOLD}Done.${RESET} Removed $removed ephemeral agent file(s)."
-  [[ $skipped -gt 0 ]] && echo -e "  ${DIM}$skipped path(s) already gone — skipped.${RESET}"
+  if [[ "$QUIET" != "true" ]]; then
+    echo ""
+    echo -e "  ${BOLD}Done.${RESET} Removed $removed ephemeral agent file(s)."
+    [[ $skipped -gt 0 ]] && echo -e "  ${DIM}$skipped path(s) already gone or skipped.${RESET}"
+  fi
 fi
