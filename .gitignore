@@ -1,2 +1,6 @@
 config.yml
 ephemeral-registry
+.claude/
+__pycache__/
+*.py[cod]
+.DS_Store
